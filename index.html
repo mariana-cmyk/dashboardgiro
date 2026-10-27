@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>G30 Gestão de Estoque - Carro Parado é Dinheiro Perdido</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <!-- Google Fonts: Inter & Montserrat -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,700;0,800;0,900;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            g30: {
+              black: '#0a0a0a',
+              card: '#141414',
+              hover: '#1b1b1b',
+              border: '#262626',
+              orange: '#FF5500',
+              'orange-hover': '#e04b00',
+              'orange-glow': '#ff6a0033',
+              muted: '#8e8e93',
+              light: '#f5f5f7'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Montserrat', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Estilização Customizada de Scrollbar e Sliders */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0d0d0d;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2a2a2a;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #FF5500;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      background: #262626;
+      border-radius: 9999px;
+      height: 8px;
+      outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #FF5500;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(255, 85, 0, 0.7);
+      border: 2px solid #ffffff;
+      transition: transform 0.15s ease-in-out;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    .glow-orange {
+      box-shadow: 0 0 25px -5px rgba(255, 85, 0, 0.25);
+    }
+    .glow-card {
+      transition: all 0.25s ease;
+    }
+    .glow-card:hover {
+      border-color: rgba(255, 85, 0, 0.4);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body class="bg-g30-black text-g30-light font-sans antialiased selection:bg-g30-orange selection:text-white min-h-screen">
+
+  <!-- TOP EXECUTIVE BANNER -->
+  <header class="border-b border-g30-border bg-g30-card/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- LOGO G30 -->
+      <div class="flex items-center space-x-3.5">
+        <div class="h-10 w-10 bg-g30-orange rounded-lg flex items-center justify-center font-display font-black text-black text-xl shadow-lg shadow-orange-500/30">
+          G30
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-display font-black text-lg tracking-wider text-white">GIRO RÁPIDO</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-g30-orange/15 text-g30-orange border border-g30-orange/30 font-semibold tracking-wide uppercase">Alta Performance</span>
+          </div>
+          <p class="text-xs text-g30-muted">Inteligência Estratégica para Concessionárias & Multimarcas</p>
+        </div>
+      </div>
+
+      <!-- STATUS & IMPACT CALLOUT -->
+      <div class="flex items-center gap-3">
+        <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-950/40 border border-red-500/30 text-red-400 text-xs font-medium">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+          </span>
+          Alerta de Pátio: Lucro evaporando a cada 24 horas
+        </div>
+        <button onclick="scrollToSimulator()" class="px-4 py-2 bg-g30-orange hover:bg-g30-orange-hover text-black font-semibold text-xs tracking-wider uppercase rounded-lg transition-all flex items-center gap-2 shadow-md hover:shadow-orange-500/20">
+          <i class="fa-solid fa-calculator"></i>
+          Simular Meu Pátio
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- HERO SECTION / PERSUASIVE IMPACT -->
+  <section class="relative overflow-hidden border-b border-g30-border bg-gradient-to-b from-[#161616] to-g30-black py-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+        
+        <div class="max-w-3xl">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-g30-orange/10 border border-g30-orange/30 text-g30-orange text-xs font-bold uppercase tracking-wider mb-4">
+            <i class="fa-solid fa-triangle-exclamation"></i> Diagnóstico de Sangramento Financeiro
+          </div>
+          <h1 class="font-display font-black text-3xl sm:text-5xl tracking-tight text-white uppercase leading-none">
+            Carro Parado no Pátio é <span class="text-transparent bg-clip-text bg-gradient-to-r from-g30-orange via-orange-400 to-amber-300">Dinheiro Queimado</span>.
+          </h1>
+          <p class="mt-4 text-base sm:text-lg text-neutral-300 font-normal leading-relaxed">
+            Muitos lojistas comemoram vender um carro pelo "preço da pedida" após 60 ou 90 dias, sem perceber que o <strong class="text-white font-semibold">custo invisível de pátio (2,5% a 4,0% a.m.)</strong> já consumiu 100% da margem líquida real.
+          </p>
+        </div>
+
+        <!-- QUICK BADGE BOX -->
+        <div class="bg-g30-card border border-g30-border p-5 rounded-xl shadow-xl flex flex-col gap-3 min-w-[280px]">
+          <div class="text-xs text-g30-muted uppercase tracking-wider font-semibold flex items-center justify-between">
+            <span>Custo Médio Dia / Carro</span>
+            <i class="fa-solid fa-clock text-g30-orange"></i>
+          </div>
+          <div class="text-3xl font-black text-white flex items-baseline gap-1 font-display">
+            <span class="text-g30-orange">R$</span> 108,33 <span class="text-xs text-g30-muted font-normal">/ dia (médio)</span>
+          </div>
+          <div class="text-xs text-neutral-400 border-t border-g30-border pt-2.5">
+            Veículo padrão R$ 100 mil custa de <strong class="text-white">R$ 2.500 a R$ 4.000</strong> a cada 30 dias que passa sem dono.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 MAIN EXECUTIVE KPIS -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      
+      <!-- KPI 1 -->
+      <div class="bg-g30-card border border-g30-border rounded-xl p-5 glow-card relative overflow-hidden">
+        <div class="absolute -right-4 -bottom-4 text-neutral-800/20 text-7xl font-black select-none pointer-events-none">
+          <i class="fa-solid fa-calendar-day"></i>
+        </div>
+        <div class="flex items-center justify-between text-g30-muted text-xs font-semibold uppercase tracking-wider">
+          <span>Sangria Diária Estimada</span>
+          <span class="text-g30-orange bg-g30-orange/10 p-1.5 rounded-md"><i class="fa-solid fa-coins"></i></span>
+        </div>
+        <div class="mt-3 text-2xl font-black text-white font-display">
+          R$ 83,34 <span class="text-sm font-normal text-g30-muted">a</span> R$ 133,33
+        </div>
+        <p class="mt-2 text-xs text-neutral-400">
+          Custo acumulado a cada 24 horas parado sob o sol do showroom.
+        </p>
+      </div>
+
+      <!-- KPI 2 -->
+      <div class="bg-g30-card border border-g30-border rounded-xl p-5 glow-card relative overflow-hidden">
+        <div class="absolute -right-4 -bottom-4 text-neutral-800/20 text-7xl font-black select-none pointer-events-none">
+          <i class="fa-solid fa-chart-line-down"></i>
+        </div>
+        <div class="flex items-center justify-between text-g30-muted text-xs font-semibold uppercase tracking-wider">
+          <span>Custo Mensal (30 Dias)</span>
+          <span class="text-g30-orange bg-g30-orange/10 p-1.5 rounded-md"><i class="fa-solid fa-receipt"></i></span>
+        </div>
+        <div class="mt-3 text-2xl font-black text-white font-display">
+          R$ 2.500 <span class="text-sm font-normal text-g30-muted">a</span> R$ 4.000
+        </div>
+        <p class="mt-2 text-xs text-neutral-400">
+          Equivalente a <span class="text-g30-orange font-semibold">2,5% a 4,0%</span> do valor total do veículo por mês.
+        </p>
+      </div>
+
+      <!-- KPI 3 -->
+      <div class="bg-g30-card border border-g30-border rounded-xl p-5 glow-card relative overflow-hidden">
+        <div class="absolute -right-4 -bottom-4 text-neutral-800/20 text-7xl font-black select-none pointer-events-none">
+          <i class="fa-solid fa-fire-burner"></i>
+        </div>
+        <div class="flex items-center justify-between text-g30-muted text-xs font-semibold uppercase tracking-wider">
+          <span>Erosão em 60 Dias</span>
+          <span class="text-amber-500 bg-amber-500/10 p-1.5 rounded-md"><i class="fa-solid fa-triangle-exclamation"></i></span>
+        </div>
+        <div class="mt-3 text-2xl font-black text-amber-400 font-display">
+          R$ 5.000 <span class="text-sm font-normal text-g30-muted">a</span> R$ 8.000
+        </div>
+        <p class="mt-2 text-xs text-neutral-400">
+          Nesta faixa, mais da metade de um lucro bruto médio já foi aniquilada.
+        </p>
+      </div>
+
+      <!-- KPI 4 -->
+      <div class="bg-g30-card border border-g30-border rounded-xl p-5 glow-card relative overflow-hidden">
+        <div class="absolute -right-4 -bottom-4 text-neutral-800/20 text-7xl font-black select-none pointer-events-none">
+          <i class="fa-solid fa-skull-crossbones"></i>
+        </div>
+        <div class="flex items-center justify-between text-g30-muted text-xs font-semibold uppercase tracking-wider">
+          <span>Ponto Crítico de Giro</span>
+          <span class="text-red-500 bg-red-500/10 p-1.5 rounded-md"><i class="fa-solid fa-skull"></i></span>
+        </div>
+        <div class="mt-3 text-2xl font-black text-red-500 font-display">
+          &gt; 45 Dias
+        </div>
+        <p class="mt-2 text-xs text-neutral-400">
+          Alerta Vermelho: Todo carro com mais de 45 dias opera em alto risco de prejuízo real.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- MAIN INTERACTIVE SIMULATOR (THE CORE WEAPON) -->
+  <main id="simulator" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="bg-g30-card border border-g30-border rounded-2xl p-6 sm:p-8 shadow-2xl relative">
+      
+      <!-- HEADER DO SIMULADOR -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-g30-border pb-6 gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="h-3 w-3 rounded-full bg-g30-orange inline-block"></span>
+            <h2 class="font-display font-black text-2xl sm:text-3xl tracking-tight text-white uppercase">
+              Simulador de Erosão de Margem
+            </h2>
+          </div>
+          <p class="text-sm text-g30-muted mt-1">
+            Mova os controles abaixo e veja exatamente em qual dia seu lucro é totalmente destruído.
+          </p>
+        </div>
+
+        <!-- CENÁRIO PRESET SELECTOR -->
+        <div class="flex items-center bg-[#0a0a0a] p-1.5 rounded-xl border border-g30-border">
+          <span class="text-xs text-neutral-400 px-3 font-medium">Cenário:</span>
+          <button id="scenario-cons" onclick="setScenario('conservador')" class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all text-neutral-400 hover:text-white">
+            Conservador (2,5%)
+          </button>
+          <button id="scenario-real" onclick="setScenario('realista')" class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all bg-g30-orange text-black">
+            Realista (3,25%)
+          </button>
+          <button id="scenario-sev" onclick="setScenario('severo')" class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all text-neutral-400 hover:text-white">
+            Severo (4,0%)
+          </button>
+        </div>
+      </div>
+
+      <!-- GRID INTERATIVO: CONTROLES VS SAÍDAS -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-8">
+        
+        <!-- CONTROLES (5 COLUNAS) -->
+        <div class="lg:col-span-5 flex flex-col justify-between space-y-6">
+          
+          <!-- VALOR DO CARRO -->
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-sm font-semibold">
+              <label for="carValueInput" class="text-neutral-300 flex items-center gap-2">
+                <i class="fa-solid fa-car-side text-g30-orange"></i> Valor de Venda do Veículo
+              </label>
+              <span id="carValueDisplay" class="text-g30-orange font-bold text-base font-display">R$ 100.000</span>
+            </div>
+            <input 
+              type="range" 
+              id="carValueInput" 
+              min="30000" 
+              max="350000" 
+              step="5000" 
+              value="100000" 
+              class="w-full"
+              oninput="updateSimulator()"
+            />
+            <div class="flex justify-between text-[11px] text-neutral-500 font-mono">
+              <span>R$ 30k</span>
+              <span>R$ 100k</span>
+              <span>R$ 200k</span>
+              <span>R$ 350k</span>
+            </div>
+          </div>
+
+          <!-- MARGEM BRUTA ESPERADA -->
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-sm font-semibold">
+              <label for="marginInput" class="text-neutral-300 flex items-center gap-2">
+                <i class="fa-solid fa-sack-dollar text-g30-orange"></i> Margem Bruta Alvo
+              </label>
+              <div class="flex items-center gap-2">
+                <span id="marginDisplay" class="text-emerald-400 font-bold text-base font-display">R$ 10.000</span>
+                <span id="marginPercentDisplay" class="text-xs bg-emerald-950 text-emerald-400 border border-emerald-800/40 px-1.5 py-0.5 rounded font-mono">(10%)</span>
+              </div>
+            </div>
+            <input 
+              type="range" 
+              id="marginInput" 
+              min="3000" 
+              max="40000" 
+              step="500" 
+              value="10000" 
+              class="w-full"
+              oninput="updateSimulator()"
+            />
+            <div class="flex justify-between text-[11px] text-neutral-500 font-mono">
+              <span>R$ 3.000</span>
+              <span>R$ 10.000</span>
+              <span>R$ 25.000</span>
+              <span>R$ 40.000</span>
+            </div>
+          </div>
+
+          <!-- DIAS NO PÁTIO -->
+          <div class="space-y-2 bg-[#0c0c0c] p-4 rounded-xl border border-g30-border">
+            <div class="flex justify-between items-center">
+              <label for="daysInput" class="text-sm font-semibold text-neutral-200 flex items-center gap-2">
+                <i class="fa-solid fa-stopwatch text-g30-orange"></i> Dias Parado no Pátio
+              </label>
+              <span id="daysDisplay" class="text-2xl font-black text-white font-display px-2.5 py-1 bg-g30-border rounded-lg">45 dias</span>
+            </div>
+            <input 
+              type="range" 
+              id="daysInput" 
+              min="1" 
+              max="120" 
+              step="1" 
+              value="45" 
+              class="w-full mt-2"
+              oninput="updateSimulator()"
+            />
+            <div class="flex justify-between text-[11px] font-mono mt-1">
+              <span class="text-emerald-400 font-bold">1d (Giro Relâmpago)</span>
+              <span class="text-amber-400 font-bold">45d</span>
+              <span class="text-red-500 font-bold">120d (Crítico)</span>
+            </div>
+          </div>
+
+          <!-- TAXA MENSAL APLICADA -->
+          <div class="flex items-center justify-between text-xs text-neutral-400 bg-g30-black/50 p-3 rounded-lg border border-neutral-800">
+            <span>Taxa Total Aplicada ao Veículo:</span>
+            <span id="rateLabel" class="text-g30-orange font-bold font-mono text-sm">3,25% ao mês (0,108% ao dia)</span>
+          </div>
+
+        </div>
+
+        <!-- RESULTADOS DO SIMULADOR (7 COLUNAS) -->
+        <div class="lg:col-span-7 flex flex-col justify-between space-y-6 bg-gradient-to-br from-[#181818] to-[#101010] p-6 rounded-2xl border border-neutral-800 shadow-inner">
+          
+          <!-- PLACAR DE LUCRO REAL VS CUSTO -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            
+            <!-- CUSTO ACUMULADO -->
+            <div class="bg-black/60 p-4 rounded-xl border border-neutral-800">
+              <span class="text-xs uppercase font-semibold text-neutral-400 tracking-wider">Custo Oculto Acumulado</span>
+              <div id="accumulatedCostDisplay" class="text-2xl sm:text-3xl font-black text-red-500 font-display mt-1">
+                - R$ 4.875,00
+              </div>
+              <p class="text-[11px] text-neutral-400 mt-1">
+                <span id="costPerDayText">R$ 108,33</span> drenados por cada dia
+              </p>
+            </div>
+
+            <!-- RESULTADO LÍQUIDO -->
+            <div class="bg-black/60 p-4 rounded-xl border border-neutral-800" id="netProfitBox">
+              <span class="text-xs uppercase font-semibold text-neutral-400 tracking-wider">Lucro Líquido Real no Bolso</span>
+              <div id="netProfitDisplay" class="text-2xl sm:text-3xl font-black text-emerald-400 font-display mt-1">
+                + R$ 5.125,00
+              </div>
+              <p id="profitStatusText" class="text-[11px] text-neutral-400 mt-1">
+                Margem residual após pagar o pátio
+              </p>
+            </div>
+
+          </div>
+
+          <!-- BARRA DE EROSÃO VISUAL -->
+          <div>
+            <div class="flex justify-between items-center text-xs mb-2">
+              <span class="font-semibold text-neutral-300">Integridade da Margem de Lucro:</span>
+              <span id="marginRemainingPercent" class="font-mono font-bold text-white">51,2% Restante</span>
+            </div>
+            <div class="w-full h-4 bg-neutral-900 rounded-full overflow-hidden p-0.5 border border-neutral-700 flex">
+              <div id="marginBar" class="h-full rounded-full transition-all duration-300 bg-gradient-to-r from-emerald-500 to-amber-500" style="width: 51.2%;"></div>
+            </div>
+            <div class="flex justify-between text-[11px] text-neutral-500 mt-1 font-mono">
+              <span>100% (Cheio no Dia 0)</span>
+              <span class="text-g30-orange font-bold">50%</span>
+              <span class="text-red-500 font-bold">0% (Prejuízo Operacional)</span>
+            </div>
+          </div>
+
+          <!-- PONTO DE VIRADA (BREAKEVEN DE TEMPO) - DESTAQUE PERSUASIVO -->
+          <div class="bg-g30-orange/10 border-2 border-g30-orange/40 rounded-xl p-4 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+              <div class="h-12 w-12 rounded-xl bg-g30-orange flex items-center justify-center text-black text-2xl font-black shrink-0">
+                <i class="fa-solid fa-hourglass-end"></i>
+              </div>
+              <div>
+                <div class="text-xs uppercase font-bold text-g30-orange tracking-wider">Ponto de Virada (Breakeven de Tempo)</div>
+                <div class="text-white text-sm font-semibold">
+                  Seu lucro zera exatamente aos <span id="breakevenDays" class="text-g30-orange font-bold font-display text-lg">92 dias</span> de pátio!
+                </div>
+                <p class="text-xs text-neutral-400">A partir deste dia, cada nova semana exige que você <strong class="text-white">tire dinheiro do próprio bolso</strong> para entregar o carro.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- MENSAGEM DINÂMICA DE IMPACTO -->
+          <div id="dynamicWarning" class="text-xs p-3 rounded-lg border font-medium flex items-center gap-2 bg-amber-950/30 border-amber-600/40 text-amber-300">
+            <i class="fa-solid fa-circle-exclamation text-base"></i>
+            <span>Atenção: Você já queimou quase metade do retorno planejado deste veículo.</span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- CHARTS SECTION: GRÁFICOS INTERATIVOS -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      
+      <!-- GRÁFICO 1: CURVA DE EROSÃO (8 COLUNAS) -->
+      <div class="lg:col-span-8 bg-g30-card border border-g30-border rounded-2xl p-6 glow-card">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-g30-border gap-2">
+          <div>
+            <h3 class="font-display font-black text-xl text-white uppercase tracking-wide flex items-center gap-2">
+              <i class="fa-solid fa-chart-area text-g30-orange"></i> Curva de Erosão da Margem (0 a 90 dias)
+            </h3>
+            <p class="text-xs text-g30-muted mt-0.5">Cruzamento entre Lucro Restante e Custo Acumulado em veículo de R$ 100k</p>
+          </div>
+          <div class="flex items-center gap-4 text-xs font-semibold">
+            <span class="flex items-center gap-1.5 text-emerald-400">
+              <span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span> Lucro Líquido
+            </span>
+            <span class="flex items-center gap-1.5 text-red-500">
+              <span class="h-2.5 w-2.5 rounded-full bg-red-500"></span> Custo do Pátio
+            </span>
+          </div>
+        </div>
+
+        <div class="h-72 w-full mt-4">
+          <canvas id="erosionChart"></canvas>
+        </div>
+      </div>
+
+      <!-- GRÁFICO 2: ROSCA DE COMPOSIÇÃO DOS CUSTOS (4 COLUNAS) -->
+      <div class="lg:col-span-4 bg-g30-card border border-g30-border rounded-2xl p-6 glow-card flex flex-col justify-between">
+        <div>
+          <div class="pb-3 border-b border-g30-border">
+            <h3 class="font-display font-black text-xl text-white uppercase tracking-wide flex items-center gap-2">
+              <i class="fa-solid fa-pie-chart text-g30-orange"></i> Vilões do Pátio
+            </h3>
+            <p class="text-xs text-g30-muted mt-0.5">Decomposição dos custos mensais médios</p>
+          </div>
+          <div class="h-56 w-full mt-4 flex items-center justify-center">
+            <canvas id="compositionChart"></canvas>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-[11px] pt-4 border-t border-g30-border">
+          <div class="flex items-center gap-1.5 text-neutral-300">
+            <span class="h-2 w-2 rounded-full bg-[#FF5500]"></span> Capital/Giro (34%)
+          </div>
+          <div class="flex items-center gap-1.5 text-neutral-300">
+            <span class="h-2 w-2 rounded-full bg-[#FF8800]"></span> Depreciação (31%)
+          </div>
+          <div class="flex items-center gap-1.5 text-neutral-300">
+            <span class="h-2 w-2 rounded-full bg-[#888888]"></span> Desp. Fixas (22%)
+          </div>
+          <div class="flex items-center gap-1.5 text-neutral-300">
+            <span class="h-2 w-2 rounded-full bg-[#444444]"></span> Manutenção (13%)
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- TABELA DETALHADA DOS COMPONENTES DE CUSTO -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-g30-card border border-g30-border rounded-2xl overflow-hidden shadow-xl">
+      
+      <div class="p-6 border-b border-g30-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h3 class="font-display font-black text-xl text-white uppercase tracking-wide flex items-center gap-2">
+            <i class="fa-solid fa-list-check text-g30-orange"></i> Anatomia do Custo por Veículo (Base R$ 100.000,00)
+          </h3>
+          <p class="text-xs text-g30-muted mt-1">Discriminação detalhada das 4 forças que sangram a margem de cada carro em estoque</p>
+        </div>
+        <div class="text-xs bg-neutral-900 border border-neutral-800 text-neutral-300 px-3 py-1.5 rounded-lg flex items-center gap-2">
+          <i class="fa-solid fa-info-circle text-g30-orange"></i> Meses de 30 dias contábeis
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-black/60 border-b border-g30-border text-xs uppercase text-g30-muted font-bold tracking-wider">
+              <th class="py-4 px-6">Componente de Custo</th>
+              <th class="py-4 px-6">Base Mensal Estimada</th>
+              <th class="py-4 px-6">Custo Mensal (R$)</th>
+              <th class="py-4 px-6 text-right">Custo por Dia (30 dias)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-g30-border text-sm">
+            
+            <!-- Linha 1 -->
+            <tr class="hover:bg-g30-hover/50 transition">
+              <td class="py-4 px-6">
+                <div class="flex items-center gap-3">
+                  <div class="h-8 w-8 rounded bg-orange-950/60 text-g30-orange flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-money-bill-transfer"></i>
+                  </div>
+                  <div>
+                    <span class="font-bold text-white block">Custo de Capital / Oportunidade</span>
+                    <span class="text-xs text-neutral-400">CDI ou juros de capital de giro travado no estoque</span>
+                  </div>
+                </div>
+              </td>
+              <td class="py-4 px-6 font-mono text-neutral-300">0,9% a 1,2% a.m.</td>
+              <td class="py-4 px-6 font-mono text-neutral-200">R$ 900,00 a R$ 1.200,00</td>
+              <td class="py-4 px-6 text-right font-mono font-bold text-g30-orange">R$ 30,00 a R$ 40,00</td>
+            </tr>
+
+            <!-- Linha 2 -->
+            <tr class="hover:bg-g30-hover/50 transition">
+              <td class="py-4 px-6">
+                <div class="flex items-center gap-3">
+                  <div class="h-8 w-8 rounded bg-orange-950/60 text-g30-orange flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-arrow-trend-down"></i>
+                  </div>
+                  <div>
+                    <span class="font-bold text-white block">Depreciação de Mercado / FIPE</span>
+                    <span class="text-xs text-neutral-400">Desvalorização natural média de ~10% a 14% ao ano</span>
+                  </div>
+                </div>
+              </td>
+              <td class="py-4 px-6 font-mono text-neutral-300">~0,8% a 1,2% a.m.</td>
+              <td class="py-4 px-6 font-mono text-neutral-200">R$ 800,00 a R$ 1.200,00</td>
+              <td class="py-4 px-6 text-right font-mono font-bold text-g30-orange">R$ 26,67 a R$ 40,00</td>
+            </tr>
+
+            <!-- Linha 3 -->
+            <tr class="hover:bg-g30-hover/50 transition">
+              <td class="py-4 px-6">
+                <div class="flex items-center gap-3">
+                  <div class="h-8 w-8 rounded bg-neutral-800 text-neutral-300 flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-building"></i>
+                  </div>
+                  <div>
+                    <span class="font-bold text-white block">Despesas Fixas e Estrutura Rateada</span>
+                    <span class="text-xs text-neutral-400">Aluguel do pátio, folha da equipe, energia, sistemas de gestão</span>
+                  </div>
+                </div>
+              </td>
+              <td class="py-4 px-6 font-mono text-neutral-300">Rateio por vaga</td>
+              <td class="py-4 px-6 font-mono text-neutral-200">R$ 500,00 a R$ 1.000,00</td>
+              <td class="py-4 px-6 text-right font-mono font-bold text-g30-orange">R$ 16,67 a R$ 33,33</td>
+            </tr>
+
+            <!-- Linha 4 -->
+            <tr class="hover:bg-g30-hover/50 transition">
+              <td class="py-4 px-6">
+                <div class="flex items-center gap-3">
+                  <div class="h-8 w-8 rounded bg-neutral-800 text-neutral-300 flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-spray-can-sparkles"></i>
+                  </div>
+                  <div>
+                    <span class="font-bold text-white block">Manutenção, Limpeza e Portais</span>
+                    <span class="text-xs text-neutral-400">Lavagens periódicas, recarga de bateria, impulsionamento Webmotors/OLX</span>
+                  </div>
+                </div>
+              </td>
+              <td class="py-4 px-6 font-mono text-neutral-300">Custo direto por anúncio</td>
+              <td class="py-4 px-6 font-mono text-neutral-200">R$ 300,00 a R$ 600,00</td>
+              <td class="py-4 px-6 text-right font-mono font-bold text-g30-orange">R$ 10,00 a R$ 20,00</td>
+            </tr>
+
+          </tbody>
+          <tfoot>
+            <tr class="bg-black text-white font-bold border-t-2 border-g30-orange">
+              <td class="py-4 px-6 uppercase tracking-wider font-display text-base">Total Estimado Acumulado</td>
+              <td class="py-4 px-6 font-mono text-g30-orange text-base">2,5% a 4,0% ao mês</td>
+              <td class="py-4 px-6 font-mono text-white text-base">R$ 2.500,00 a R$ 4.000,00</td>
+              <td class="py-4 px-6 text-right font-mono text-g30-orange text-lg">R$ 83,34 a R$ 133,33</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- RÉGUA DE MATURIDADE DO ESTOQUE (MÉTODO G30) -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-6">
+      <h3 class="font-display font-black text-2xl text-white uppercase tracking-tight flex items-center gap-2">
+        <i class="fa-solid fa-gauge-high text-g30-orange"></i> Régua de Risco por Faixas de Giro
+      </h3>
+      <p class="text-sm text-g30-muted">Como a rentabilidade real de cada veículo transita de joia a veneno dentro da loja</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      
+      <!-- FAIXA 1 -->
+      <div class="bg-g30-card border border-emerald-500/30 rounded-xl p-5 relative overflow-hidden flex flex-col justify-between">
+        <div class="h-1.5 w-full bg-emerald-500 absolute top-0 left-0"></div>
+        <div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs uppercase font-extrabold text-emerald-400 tracking-wider">0 a 15 Dias</span>
+            <span class="text-xs bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded-full font-bold">Estoque Ouro</span>
+          </div>
+          <h4 class="font-display font-black text-lg text-white mt-2">Margem Preservada (&gt;90%)</h4>
+          <p class="text-xs text-neutral-300 mt-2 leading-relaxed">
+            O giro relâmpago. O capital gira com agilidade, a margem planejada cai limpa no caixa e a liquidez impulsiona novas compras.
+          </p>
+        </div>
+        <div class="mt-4 pt-3 border-t border-g30-border/60 text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
+          <i class="fa-solid fa-check-circle"></i> Retorno Máximo sobre Capital
+        </div>
+      </div>
+
+      <!-- FAIXA 2 -->
+      <div class="bg-g30-card border border-amber-500/30 rounded-xl p-5 relative overflow-hidden flex flex-col justify-between">
+        <div class="h-1.5 w-full bg-amber-500 absolute top-0 left-0"></div>
+        <div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs uppercase font-extrabold text-amber-400 tracking-wider">16 a 30 Dias</span>
+            <span class="text-xs bg-amber-950 text-amber-400 px-2 py-0.5 rounded-full font-bold">Faixa de Atenção</span>
+          </div>
+          <h4 class="font-display font-black text-lg text-white mt-2">Erosão Moderada (~25%)</h4>
+          <p class="text-xs text-neutral-300 mt-2 leading-relaxed">
+            Custos fixos e portais já consomem 1/4 do lucro. Exige fotos novas, revisão de descrição e repost nos canais digitais.
+          </p>
+        </div>
+        <div class="mt-4 pt-3 border-t border-g30-border/60 text-[11px] text-amber-400 font-semibold flex items-center gap-1">
+          <i class="fa-solid fa-triangle-exclamation"></i> Reavaliar Precificação
+        </div>
+      </div>
+
+      <!-- FAIXA 3 -->
+      <div class="bg-g30-card border border-orange-500/40 rounded-xl p-5 relative overflow-hidden flex flex-col justify-between">
+        <div class="h-1.5 w-full bg-g30-orange absolute top-0 left-0"></div>
+        <div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs uppercase font-extrabold text-g30-orange tracking-wider">31 a 45 Dias</span>
+            <span class="text-xs bg-orange-950 text-g30-orange px-2 py-0.5 rounded-full font-bold">Alerta Laranja</span>
+          </div>
+          <h4 class="font-display font-black text-lg text-white mt-2">Margem Crítica (&gt;50% perdida)</h4>
+          <p class="text-xs text-neutral-300 mt-2 leading-relaxed">
+            Metade do lucro estimado evaporou. O carro está pagando apenas a própria permanência no showroom. Ação tática urgente.
+          </p>
+        </div>
+        <div class="mt-4 pt-3 border-t border-g30-border/60 text-[11px] text-g30-orange font-semibold flex items-center gap-1">
+          <i class="fa-solid fa-bell"></i> Oferta Agressiva / Bônus Vendedor
+        </div>
+      </div>
+
+      <!-- FAIXA 4 -->
+      <div class="bg-g30-card border border-red-500/40 rounded-xl p-5 relative overflow-hidden flex flex-col justify-between">
+        <div class="h-1.5 w-full bg-red-600 absolute top-0 left-0"></div>
+        <div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs uppercase font-extrabold text-red-500 tracking-wider">46+ Dias</span>
+            <span class="text-xs bg-red-950 text-red-400 px-2 py-0.5 rounded-full font-bold">Zona de Prejuízo</span>
+          </div>
+          <h4 class="font-display font-black text-lg text-white mt-2">Sangria Operacional</h4>
+          <p class="text-xs text-neutral-300 mt-2 leading-relaxed">
+            O veículo vira âncora. Mesmo que seja vendido na tabela FIPE, o lojista já pagou para mantê-lo. É o clássico "vendeu mas perdeu".
+          </p>
+        </div>
+        <div class="mt-4 pt-3 border-t border-g30-border/60 text-[11px] text-red-400 font-semibold flex items-center gap-1">
+          <i class="fa-solid fa-skull"></i> Repasse Imediato ou Liquidação
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CALL TO ACTION & ESTRATÉGIAS TÁTICAS G30 -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="bg-gradient-to-r from-[#171717] via-[#1f1612] to-[#171717] border-2 border-g30-orange/30 rounded-2xl p-8 sm:p-10 shadow-2xl relative overflow-hidden">
+      
+      <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
+        <div class="max-w-2xl">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded bg-g30-orange text-black font-extrabold text-xs uppercase tracking-wider mb-3">
+            O Mandamento G30
+          </div>
+          <h2 class="font-display font-black text-2xl sm:text-4xl text-white uppercase leading-tight">
+            "Mais vale R$ 3.000 no bolso em 10 dias do que sonhar com R$ 8.000 em 90 dias."
+          </h2>
+          <p class="text-neutral-300 text-sm sm:text-base mt-4 leading-relaxed">
+            No primeiro caso você gira seu capital 9 vezes no ano, multiplicando seus ganhos. No segundo caso, o carro parado consumiu todo o lucro em juros, desvalorização e pátio.
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 text-xs">
+            <div class="bg-black/60 p-3 rounded-lg border border-neutral-800">
+              <span class="text-g30-orange font-bold block mb-1">1. Repasse Rápido</span>
+              Veículo sem procura em 20 dias? Repasse no atacado e recompre carro de alta liquidez.
+            </div>
+            <div class="bg-black/60 p-3 rounded-lg border border-neutral-800">
+              <span class="text-g30-orange font-bold block mb-1">2. Precificação Dinâmica</span>
+              Ajuste preços a cada 10 dias. Não espere 60 dias para dar desconto.
+            </div>
+            <div class="bg-black/60 p-3 rounded-lg border border-neutral-800">
+              <span class="text-g30-orange font-bold block mb-1">3. Incentivo por Giro</span>
+              Comissione mais a equipe nos primeiros 15 dias de pátio do que nos carros velhos.
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-3 shrink-0 w-full sm:w-auto">
+          <button onclick="window.print()" class="px-6 py-4 bg-g30-orange hover:bg-g30-orange-hover text-black font-display font-black text-sm uppercase tracking-wider rounded-xl transition shadow-lg shadow-orange-500/25 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-file-pdf text-base"></i>
+            Exportar Apresentação / PDF
+          </button>
+          <button onclick="scrollToSimulator()" class="px-6 py-3.5 bg-neutral-900 hover:bg-neutral-800 text-white border border-neutral-700 font-semibold text-xs uppercase tracking-wider rounded-xl transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-rotate-left"></i>
+            Recalcular Outro Veículo
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-g30-border bg-black py-8 px-4 text-center text-xs text-neutral-500">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="font-display font-black text-g30-orange text-sm">G30</span>
+        <span class="text-neutral-400">Giro Rápido &copy; 2026. Todos os direitos reservados.</span>
+      </div>
+      <div>
+        Metodologia de Custo de Oportunidade e Giro para Gestão Profissional de Veículos Seminovos.
+      </div>
+    </div>
+  </footer>
+
+  <!-- LOGIC & SIMULATOR SCRIPTS -->
+  <script>
+    // Parâmetros Globais
+    let currentScenario = 'realista'; // 'conservador' (2.5%), 'realista' (3.25%), 'severo' (4.0%)
+    const rates = {
+      conservador: 0.025, // 2.5% ao mês
+      realista: 0.0325,   // 3.25% ao mês
+      severo: 0.040       // 4.0% ao mês
+    };
+
+    let erosionChartInstance = null;
+    let compositionChartInstance = null;
+
+    // Formatador de Moeda BRL
+    function formatBRL(val) {
+      return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 2 });
+    }
+
+    // Configurar Cenário
+    function setScenario(type) {
+      currentScenario = type;
+      
+      const btnCons = document.getElementById('scenario-cons');
+      const btnReal = document.getElementById('scenario-real');
+      const btnSev = document.getElementById('scenario-sev');
+
+      // Reset styles
+      [btnCons, btnReal, btnSev].forEach(b => {
+        b.className = "px-3 py-1.5 text-xs font-bold rounded-lg transition-all text-neutral-400 hover:text-white";
+      });
+
+      if (type === 'conservador') {
+        btnCons.className = "px-3 py-1.5 text-xs font-bold rounded-lg transition-all bg-g30-orange text-black";
+      } else if (type === 'realista') {
+        btnReal.className = "px-3 py-1.5 text-xs font-bold rounded-lg transition-all bg-g30-orange text-black";
+      } else {
+        btnSev.className = "px-3 py-1.5 text-xs font-bold rounded-lg transition-all bg-g30-orange text-black";
+      }
+
+      updateSimulator();
+    }
+
+    function scrollToSimulator() {
+      const el = document.getElementById('simulator');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Atualização em Tempo Real do Simulador
+    function updateSimulator() {
+      const carValue = parseFloat(document.getElementById('carValueInput').value);
+      const grossMargin = parseFloat(document.getElementById('marginInput').value);
+      const days = parseInt(document.getElementById('daysInput').value);
+
+      const monthlyRate = rates[currentScenario];
+      const dailyRate = monthlyRate / 30;
+
+      // Custos
+      const costPerDay = carValue * dailyRate;
+      const accumulatedCost = costPerDay * days;
+      const netProfit = grossMargin - accumulatedCost;
+      const marginPercent = ((grossMargin / carValue) * 100).toFixed(1);
+
+      // Breakeven (Quantos dias até o lucro zerar)
+      const breakevenDays = Math.floor(grossMargin / costPerDay);
+
+      // Percentual de margem restante
+      const remainingPercent = Math.max(0, Math.min(100, (netProfit / grossMargin) * 100));
+
+      // Atualiza Displays de Texto
+      document.getElementById('carValueDisplay').innerText = formatBRL(carValue);
+      document.getElementById('marginDisplay').innerText = formatBRL(grossMargin);
+      document.getElementById('marginPercentDisplay').innerText = `(${marginPercent}%)`;
+      document.getElementById('daysDisplay').innerText = `${days} ${days === 1 ? 'dia' : 'dias'}`;
+      
+      const ratePercentTxt = (monthlyRate * 100).toFixed(2);
+      const dailyPercentTxt = (dailyRate * 100).toFixed(3);
+      document.getElementById('rateLabel').innerText = `${ratePercentTxt}% a.m. (~${dailyPercentTxt}% ao dia)`;
+
+      document.getElementById('accumulatedCostDisplay').innerText = `- ${formatBRL(accumulatedCost)}`;
+      document.getElementById('costPerDayText').innerText = formatBRL(costPerDay);
+      
+      const netProfitDisplay = document.getElementById('netProfitDisplay');
+      const netProfitBox = document.getElementById('netProfitBox');
+      const profitStatusText = document.getElementById('profitStatusText');
+      const dynamicWarning = document.getElementById('dynamicWarning');
+
+      if (netProfit >= 0) {
+        netProfitDisplay.innerText = `+ ${formatBRL(netProfit)}`;
+        netProfitDisplay.className = "text-2xl sm:text-3xl font-black text-emerald-400 font-display mt-1";
+        profitStatusText.innerText = `Margem residual ainda preservada (${(netProfit / grossMargin * 100).toFixed(0)}%)`;
+        netProfitBox.style.borderColor = "rgba(16, 185, 129, 0.3)";
+      } else {
+        netProfitDisplay.innerText = `- ${formatBRL(Math.abs(netProfit))}`;
+        netProfitDisplay.className = "text-2xl sm:text-3xl font-black text-red-500 font-display mt-1";
+        profitStatusText.innerText = "ATENÇÃO: Você está pagando para vender este veículo!";
+        netProfitBox.style.borderColor = "rgba(239, 68, 68, 0.6)";
+      }
+
+      // Barra de Progresso
+      const marginBar = document.getElementById('marginBar');
+      const marginRemainingPercent = document.getElementById('marginRemainingPercent');
+
+      marginBar.style.width = `${remainingPercent}%`;
+      marginRemainingPercent.innerText = netProfit >= 0 ? `${remainingPercent.toFixed(1)}% Restante` : `0% (Déficit de ${formatBRL(Math.abs(netProfit))})`;
+
+      if (remainingPercent > 50) {
+        marginBar.className = "h-full rounded-full transition-all duration-300 bg-emerald-500";
+      } else if (remainingPercent > 20) {
+        marginBar.className = "h-full rounded-full transition-all duration-300 bg-amber-500";
+      } else {
+        marginBar.className = "h-full rounded-full transition-all duration-300 bg-red-600 shadow-[0_0_10px_rgba(239,68,68,0.8)]";
+      }
+
+      // Breakeven
+      document.getElementById('breakevenDays').innerText = `${breakevenDays} dias`;
+
+      // Mensagem de Advertência Dinâmica
+      if (days > breakevenDays) {
+        dynamicWarning.className = "text-xs p-3 rounded-lg border font-medium flex items-center gap-2 bg-red-950/60 border-red-500 text-red-300";
+        dynamicWarning.innerHTML = `<i class="fa-solid fa-skull-crossbones text-base text-red-500"></i><span><strong>Operação no Prejuízo:</strong> Este veículo já ultrapassou o breakeven em ${days - breakevenDays} dias. Cada novo dia adiciona prejuízo real ao caixa da loja.</span>`;
+      } else if (days > breakevenDays * 0.6) {
+        dynamicWarning.className = "text-xs p-3 rounded-lg border font-medium flex items-center gap-2 bg-orange-950/40 border-orange-500/60 text-orange-300";
+        dynamicWarning.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-base text-orange-400"></i><span><strong>Alerta Laranja:</strong> Mais de 60% da margem líquida foi evaporada pelas taxas de pátio. Promova uma queima ou repasse imediato.</span>`;
+      } else {
+        dynamicWarning.className = "text-xs p-3 rounded-lg border font-medium flex items-center gap-2 bg-emerald-950/30 border-emerald-500/40 text-emerald-300";
+        dynamicWarning.innerHTML = `<i class="fa-solid fa-circle-check text-base text-emerald-400"></i><span><strong>Zona Saudável:</strong> Giro ágil. A margem bruta está predominantemente blindada.</span>`;
+      }
+
+      // Atualiza Gráficos
+      updateCharts(carValue, grossMargin, dailyRate);
+    }
+
+    // Inicialização dos Gráficos com Chart.js
+    function initCharts() {
+      // 1. Gráfico de Linhas: Erosão
+      const ctxErosion = document.getElementById('erosionChart').getContext('2d');
+      erosionChartInstance = new Chart(ctxErosion, {
+        type: 'line',
+        data: {
+          labels: ['Dia 0', 'Dia 15', 'Dia 30', 'Dia 45', 'Dia 60', 'Dia 75', 'Dia 90'],
+          datasets: [
+            {
+              label: 'Lucro Líquido Real (R$)',
+              data: [10000, 8375, 6750, 5125, 3500, 1875, 250],
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.08)',
+              borderWidth: 3,
+              fill: true,
+              tension: 0.3,
+              pointBackgroundColor: '#10b981',
+              pointRadius: 4
+            },
+            {
+              label: 'Custo Acumulado do Pátio (R$)',
+              data: [0, 1625, 3250, 4875, 6500, 8125, 9750],
+              borderColor: '#ef4444',
+              backgroundColor: 'rgba(239, 68, 68, 0.08)',
+              borderWidth: 3,
+              fill: true,
+              tension: 0.3,
+              pointBackgroundColor: '#ef4444',
+              pointRadius: 4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#141414',
+              borderColor: '#FF5500',
+              borderWidth: 1,
+              titleColor: '#fff',
+              bodyColor: '#e0e0e0',
+              callbacks: {
+                label: function(context) {
+                  return `${context.dataset.label}: ${formatBRL(context.parsed.y)}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#888888', font: { family: 'Inter', size: 11 } }
+            },
+            y: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: {
+                color: '#888888',
+                font: { family: 'Inter', size: 11 },
+                callback: function(val) { return 'R$ ' + (val/1000) + 'k'; }
+              }
+            }
+          }
+        }
+      });
+
+      // 2. Gráfico Donut: Decomposição dos Custos
+      const ctxComp = document.getElementById('compositionChart').getContext('2d');
+      compositionChartInstance = new Chart(ctxComp, {
+        type: 'doughnut',
+        data: {
+          labels: [
+            'Custo de Capital (CDI/Giro)',
+            'Depreciação de Mercado / FIPE',
+            'Despesas Fixas e Estrutura',
+            'Manutenção, Limpeza e Portais'
+          ],
+          datasets: [{
+            data: [34, 31, 22, 13],
+            backgroundColor: [
+              '#FF5500', // Laranja G30
+              '#FF8800', // Laranja Claro
+              '#888888', // Cinza Médio
+              '#333333'  // Cinza Escuro
+            ],
+            borderWidth: 2,
+            borderColor: '#141414'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '72%',
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#141414',
+              borderColor: '#FF5500',
+              borderWidth: 1,
+              callbacks: {
+                label: function(context) {
+                  return ` ${context.label}: ${context.parsed}% do custo mensal`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Atualiza os pontos da curva de erosão com os valores inseridos
+    function updateCharts(carValue, grossMargin, dailyRate) {
+      if (!erosionChartInstance) return;
+
+      const intervals = [0, 15, 30, 45, 60, 75, 90];
+      const profitData = [];
+      const costData = [];
+
+      intervals.forEach(d => {
+        const cost = carValue * dailyRate * d;
+        const profit = grossMargin - cost;
+        costData.push(Math.round(cost));
+        profitData.push(Math.round(profit));
+      });
+
+      erosionChartInstance.data.datasets[0].data = profitData;
+      erosionChartInstance.data.datasets[1].data = costData;
+      erosionChartInstance.update();
+    }
+
+    // Inicialização da Página
+    window.onload = function() {
+      initCharts();
+      updateSimulator();
+    };
+  </script>
+</body>
+</html>
